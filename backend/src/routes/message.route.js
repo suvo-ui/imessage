@@ -1,10 +1,9 @@
 import express from "express";
+import { getUsersForSidebar } from "../controllers/message.controller.js";
 import { protectRoute } from "../middlewares/auth.middleware.js";
-import { checkAuth } from "../controllers/auth.controller.js";
 
 const router = express.Router();
 
-//api/auth/check
-router.get("/check", protectRoute, checkAuth);
+router.get("/users", protectRoute, getUsersForSidebar);
 
 export default router;
