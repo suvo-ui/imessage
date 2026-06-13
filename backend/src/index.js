@@ -9,6 +9,7 @@ import { connectDB } from "./lib/db.js";
 
 import fs from "fs";
 import path from "path";
+import job from "./lib/cron.js";
 
 const app = express();
 
@@ -21,6 +22,11 @@ app.use(express.json()); //parse the request from the client
 app.use(cors({ origin: FRONTEND_URL, credentials: true }));
 app.use(clerkMiddleware());
 
+//just to ensure whether the server is up and running
+app.get("/health", (req, res) => {
+  res.status(200).json({ ok: true });
+});
+
 //if the public directory eist serves the static files
 //this is for the production build
 if (fs.existsSync(publicDir)) {
@@ -31,12 +37,11 @@ if (fs.existsSync(publicDir)) {
   });
 }
 
-//just to ensure whether the server is up and running
-app.get("/health", (req, res) => {
-  res.status(200).json({ ok: true });
-});
-
 app.listen(PORT, () => {
   connectDB();
   console.log("Server Running on port 3000");
+
+  if (process.env.NODE_ENV === "production") {
+    job.start();
+  }
 });
