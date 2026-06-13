@@ -13,7 +13,7 @@ import job from "./lib/cron.js";
 
 import clerkWebhook from "./webhooks/clerk.webhook.js";
 import authRoutes from "./routes/auth.route.js";
-import messageRotes from "./routes/message.route.js";
+import messageRoutes from "./routes/message.route.js";
 const app = express();
 
 const PORT = process.env.PORT;
