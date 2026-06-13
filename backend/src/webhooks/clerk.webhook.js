@@ -5,19 +5,26 @@ import { verifyWebhook } from "@clerk/backend/webhooks";
 const router = express.Router();
 
 router.post("/", async (req, res) => {
+  console.log("====================================");
   console.log("WEBHOOK RECEIVED");
+  console.log("====================================");
+
   try {
     const signingSecret = process.env.CLERK_WEBHOOK_SIGNING_SECRET;
 
     if (!signingSecret) {
-      res.status(500).json({ message: "Webhook secret is not provided" });
-      return;
+      console.error("CLERK_WEBHOOK_SIGNING_SECRET is missing");
+
+      return res.status(500).json({
+        message: "Webhook secret is not provided",
+      });
     }
 
-    //clerk's verifier expects a Web Request with the raw body; express.raw gives a Buffer
     const payload = Buffer.isBuffer(req.body)
       ? req.body.toString("utf-8")
       : String(req.body);
+
+    console.log("Payload length:", payload.length);
 
     const request = new Request("http://internal/webhooks/clerk", {
       method: "POST",
@@ -25,13 +32,21 @@ router.post("/", async (req, res) => {
       body: payload,
     });
 
-    //throws if the signature is wrong or the body was tampered with;only then do we trust evt
-    const evt = await verifyWebhook(request, { signingSecret });
+    console.log("Verifying webhook...");
 
-    console.log("EVENT:", evt.type);
+    const evt = await verifyWebhook(request, {
+      signingSecret,
+    });
+
+    console.log("Webhook verified successfully");
+    console.log("EVENT TYPE:", evt.type);
 
     if (evt.type === "user.created" || evt.type === "user.updated") {
+      console.log("Processing user create/update");
+
       const u = evt.data;
+
+      console.log("Clerk User ID:", u.id);
 
       const email =
         u.email_addresses?.find((e) => e.id === u.primary_email_address_id)
@@ -42,21 +57,57 @@ router.post("/", async (req, res) => {
         u.username ||
         email?.split("@")[0];
 
-      await User.findOneAndUpdate(
-        { clerkID: u.id },
-        { clerkID: u.id, email, fullName, profilePic: u.image_url },
-        { new: true, upsert: true, setDefaultsOnInsert: true },
+      console.log("Email:", email);
+      console.log("Full Name:", fullName);
+
+      const result = await User.findOneAndUpdate(
+        {
+          clerkID: u.id,
+        },
+        {
+          clerkID: u.id,
+          email,
+          fullName,
+          profilePic: u.image_url,
+        },
+        {
+          new: true,
+          upsert: true,
+          setDefaultsOnInsert: true,
+        },
       );
+
+      console.log("MongoDB update successful");
+      console.log("Saved user:", result);
     }
 
     if (evt.type === "user.deleted") {
-      if (evt.data.id) await User.findOneAndDelete({ clerkID: evt.data.id });
+      console.log("Processing user deletion");
+
+      if (evt.data.id) {
+        const deletedUser = await User.findOneAndDelete({
+          clerkID: evt.data.id,
+        });
+
+        console.log("Deleted user:", deletedUser);
+      }
     }
 
-    res.status(200).json({ received: true });
+    console.log("Webhook completed successfully");
+
+    return res.status(200).json({
+      received: true,
+    });
   } catch (error) {
-    console.error("Error in Client Webhook:", error);
-    res.status(400).json({ message: "Webhook Verification Failed" });
+    console.error("====================================");
+    console.error("WEBHOOK ERROR");
+    console.error(error);
+    console.error("====================================");
+
+    return res.status(400).json({
+      message: "Webhook Verification Failed",
+      error: error.message,
+    });
   }
 });
 
