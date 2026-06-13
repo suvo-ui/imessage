@@ -18,7 +18,7 @@ router.post("/", async (req, res) => {
       ? req.body.toString("utf-8")
       : String(req.body);
 
-    const request = new Request("http:/internal/webhooks/clerk", {
+    const request = new Request("http://internal/webhooks/clerk", {
       method: "POST",
       headers: new Headers(req.headers),
       body: payload,
