@@ -24,7 +24,7 @@ const publicDir = path.join(process.cwd(), "public");
 app.use(
   "/api/webhooks/clerk",
   express.raw({ type: "application/json" }),
-  clerkWebhooks,
+  clerkWebhook,
 );
 
 app.use(express.json()); //parse the request from the client
