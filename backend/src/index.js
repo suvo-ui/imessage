@@ -27,6 +27,8 @@ app.use(
   clerkWebhook,
 );
 
+app.use("/api/auth", authRoutes);
+
 app.use(express.json()); //parse the request from the client
 app.use(cors({ origin: FRONTEND_URL, credentials: true }));
 app.use(clerkMiddleware());
