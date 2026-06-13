@@ -11,12 +11,21 @@ import fs from "fs";
 import path from "path";
 import job from "./lib/cron.js";
 
+import clerkWebhook from "./webhooks/clerk.webhook.js";
+
 const app = express();
 
 const PORT = process.env.PORT;
 const FRONTEND_URL = process.env.FRONTEND_URL;
 
 const publicDir = path.join(process.cwd(), "public");
+
+//it is important that you dont parse the webhook data, it should be in raw format
+app.use(
+  "/api/webhooks/clerk",
+  express.raw({ type: "application/json" }),
+  clerkWebhooks,
+);
 
 app.use(express.json()); //parse the request from the client
 app.use(cors({ origin: FRONTEND_URL, credentials: true }));
