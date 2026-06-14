@@ -44,10 +44,10 @@ router.post("/", async (req, res) => {
 
       await User.findOneAndUpdate(
         {
-          clerkID: u.id,
+          clerkId: u.id,
         },
         {
-          clerkID: u.id,
+          clerkId: u.id,
           email,
           fullName,
           profilePic: u.image_url,
@@ -62,7 +62,7 @@ router.post("/", async (req, res) => {
 
     if (evt.type === "user.deleted" && evt.data.id) {
       await User.findOneAndDelete({
-        clerkID: evt.data.id,
+        clerkId: evt.data.id,
       });
     }
 

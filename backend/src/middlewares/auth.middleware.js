@@ -9,8 +9,9 @@ export async function protectRoute(req, res, next) {
       res.status(401).json({ message: "Unauthorised" });
     }
 
-    const user = User.findOne({ clerkID: userId });
-
+    console.log("Clerk userId:", userId);
+    const user = await User.findOne({ clerkId: userId });
+    console.log("Mongo user:", user);
     if (!user) {
       res.status(404).json({ message: "User profile not syncesd yet" });
       return;

@@ -5,6 +5,8 @@ import { useEffect } from "react";
 
 import ChatSidebar from "../components/chat/ChatSidebar";
 import ChatHeader from "../components/chat/ChatHeader";
+import ChatComposer from "../components/chat/ChatComposer";
+import MessageList from "../components/chat/MessageList";
 
 const ChatPage = () => {
   const { frameStyle } = useWallpaper();
@@ -55,9 +57,9 @@ const ChatPage = () => {
           }`}
         >
           <ChatHeader />
-          {/* <MessageList /> */}
+          <MessageList />
 
-          {/* {activeConversation ? <ChatComposer /> : null} */}
+          {activeConversation ? <ChatComposer /> : null}
         </div>
       </div>
     </div>
